@@ -7,6 +7,7 @@ import LoginForm from './LoginForm'
 import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
+import AuthRoute from './AuthRoute'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -29,6 +30,11 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
+    if(localStorage.getItem('token')){
+      localStorage.removeItem('token');
+      navigate('/')
+    }
+
   }
 
   const login = ({ username, password }) => {
@@ -40,7 +46,7 @@ export default function App() {
     // to the Articles screen. Don't forget to turn off the spinner!
     setMessage('');
     setSpinnerOn(true);
-    axios.post(`http://localhost:9000/api/login`, {username, password})
+    axios.post(loginUrl, {username, password})
     .then(res => {
       console.log(res);
       setMessage(res.data.message);
@@ -66,15 +72,15 @@ export default function App() {
     // Don't forget to turn off the spinner!
     setMessage('');
     setSpinnerOn(true);
-    axiosWithAuth().get('http://localhost:9000/api/articles')
+    axiosWithAuth().get(articlesUrl)
     .then(res => {
       setSpinnerOn(false);
       setMessage(res.data.message);
       setArticles(res.data.articles);
-      console.log(articles);
     })
     .catch(err => {
-      console.log(err);
+      setSpinnerOn(false);
+      setMessage(err.message);
     })
   }
 
@@ -83,6 +89,15 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    spinnerOn(true);
+    setMessage('');
+    axiosWithAuth().post(articlesUrl, article)
+    .then(res => {
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   const updateArticle = ({ article_id, article }) => {
@@ -109,10 +124,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LoginForm login={login}/>} />
           <Route path="articles" element={
-            <>
-              <ArticleForm />
+            <AuthRoute>
+              <ArticleForm postArticle={postArticle}/>
               <Articles getArticles={getArticles} articles={articles}/>
-            </>
+            </AuthRoute>
           } />
         </Routes>
         <footer>Bloom Institute of Technology 2022</footer>
