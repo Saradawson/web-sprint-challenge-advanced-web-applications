@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import axiosWithAuth from '../axios'
 import Articles from './Articles'
 import LoginForm from './LoginForm'
 import Message from './Message'
@@ -63,6 +64,18 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    setMessage('');
+    setSpinnerOn(true);
+    axiosWithAuth().get('http://localhost:9000/api/articles')
+    .then(res => {
+      setSpinnerOn(false);
+      setMessage(res.data.message);
+      setArticles(res.data.articles);
+      console.log(articles);
+    })
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   const postArticle = article => {
@@ -98,7 +111,7 @@ export default function App() {
           <Route path="articles" element={
             <>
               <ArticleForm />
-              <Articles />
+              <Articles getArticles={getArticles} articles={articles}/>
             </>
           } />
         </Routes>
