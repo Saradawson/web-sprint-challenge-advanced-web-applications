@@ -39,9 +39,13 @@ export default function App() {
     // to the Articles screen. Don't forget to turn off the spinner!
     setMessage('');
     setSpinnerOn(true);
-    axios.post(`http://localhost:9000/api/logi`, {username, password})
+    axios.post(`http://localhost:9000/api/login`, {username, password})
     .then(res => {
       console.log(res);
+      setMessage(res.data.message);
+      setSpinnerOn(false);
+      localStorage.setItem('token', res.data.token);
+      navigate('/articles');
     })
     .catch(err => {
       console.log(err.response.data.message);
