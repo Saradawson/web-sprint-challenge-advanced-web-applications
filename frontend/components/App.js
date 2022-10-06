@@ -91,24 +91,56 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-    spinnerOn(true);
+    setSpinnerOn(true);
     setMessage('');
     axiosWithAuth().post(articlesUrl, article)
     .then(res => {
       console.log(res);
+      setSpinnerOn(false);
+      setMessage(res.data.message);
+      setArticles([...articles, res.data.article]);
     })
     .catch(err => {
       console.log(err);
     })
   }
 
-  const updateArticle = ({ article_id, article }) => {
+  const updateArticle = ( article ) => {
     // ✨ implement
     // You got this!
+    setSpinnerOn(true);
+    setMessage('');
+    axiosWithAuth().put(`http://localhost:9000/api/articles/${article.article_id}`, article)
+    .then(res => {
+      setSpinnerOn(false);
+      setMessage(res.data.message);
+      setArticles(articles.map(art => {
+        if(art.article_id === article.article_id){
+          return res.data.article;
+        } else {
+          return art;
+        }
+      }))
+    })
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   const deleteArticle = article_id => {
     // ✨ implement
+    setSpinnerOn(true);
+    setMessage('');
+    axiosWithAuth().delete(`http://localhost:9000/api/articles/${article_id}`)
+    .then(res => {
+      setSpinnerOn(false);
+      setMessage(res.data.message);
+      setArticles(articles.filter(article => article.article_id !== article_id ? article : ''));
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   return (
@@ -127,8 +159,8 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login}/>} />
           <Route path="articles" element={
             <AuthRoute>
-              <ArticleForm postArticle={postArticle}/>
-              <Articles getArticles={getArticles} articles={articles}/>
+              <ArticleForm setCurrentArticleId={setCurrentArticleId} updateArticle={updateArticle} postArticle={postArticle} currentArticle={articles.find(x => x.article_id === currentArticleId)}/>
+              <Articles setArticles={setArticles} deleteArticle={deleteArticle} getArticles={getArticles} articles={articles} setCurrentArticleId={setCurrentArticleId}/>
             </AuthRoute>
           } />
         </Routes>
