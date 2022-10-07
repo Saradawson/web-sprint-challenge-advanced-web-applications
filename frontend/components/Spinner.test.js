@@ -1,12 +1,9 @@
-import LoginForm from'./LoginForm';
+import App from './App';
 import React from 'react';
 import Spinner from './Spinner';
 import { render, screen, fireEvent } from '@testing-library/react'; 
+import '@testing-library/jest-dom/extend-expect';
 
-
-const usernameInput = () => screen.queryByPlaceholderText('Enter username');
-const passwordInput = () => screen.queryByPlaceholderText('Enter password');
-const loginBtn = () => screen.queryByText('Submit credentials');
 // Import the Spinner component into this file and test
 // that it renders what it should for the different props it can take.
 test('sanity', () => {
@@ -17,13 +14,15 @@ test('renders spinner without errors', () => {
   render(<Spinner />);
 })
 
-test('spinner renders when login button is clicked', () => {
-  render(<LoginForm />);
-  render(<Spinner />);
-  fireEvent.change(usernameInput(), {target: {value: 'bloom'}});
-  fireEvent.change(passwordInput(), { target: { value: '12345678' }});
-  fireEvent.click(loginBtn());
-  const spinner = screen.queryByTestId('spinner');
+test('spinner renders when on', () => {
+  render(<Spinner on={true}/>);
+  const spinner = screen.getByText(/please wait.../i)
   expect(spinner).toBeInTheDocument();
 
+})
+
+test('spinner not visable when off', () => {
+  render(<Spinner on={false}/>);
+  const spinner = screen.queryByText(/please wait.../i);
+  expect(spinner).toBe(null);
 })
